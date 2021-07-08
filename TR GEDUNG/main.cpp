@@ -1,13 +1,32 @@
 #include "main.h"
+#include <stdlib.h>
+#include <windows.h>
+#ifdef __APPLE__
+#include <GLUT/glut.h>
+#else
+#include <GL/glut.h>
+#endif
+
+//Griya Jitri Pabutungan (672019333)
+//Yosef Agil Prayogi (672019336)
+//Riza Jeheskiel N. Tarigan (672019360)
+//Andrew Aquila Chrisanto Pabendon (672019196)
+
+
+void init(void);
+void displat(void);
+void keyboard(unsigned char, int, int);
+
+using namespace std;
 
 int POS_X, POS_Y;
 
-std::string model_name = "GrandCanyonPark.obj";
+std::string model_name = "GrandCanyonPark2.obj";
 
 GLfloat light_pos[] = { -10.0f, 10.0f, 100.00f, 1.0f };
 
 float pos_x, pos_y, pos_z;
-float angle_x = 30.0f, angle_y = 0.0f;
+float angle_x = 20.0f, angle_y = 0.0f;
 
 int x_old = 0, y_old = 0;
 int current_scroll = 5;
@@ -22,17 +41,22 @@ float xmov = 0.0f;
 float ymov = 0.0f;
 float zmov = 0.0f;
 
+float xrot = 0;
+float yrot = 0;
+
 Model model;
 
 void init() {
     glEnable(GL_LIGHTING);
     glEnable(GL_LIGHT0);
     glLightfv(GL_LIGHT0, GL_POSITION, light_pos);
-    glClearColor(0.4f, 0.4f, 0.4f, 1.0f);
+    glClearColor(0.678f, 0.725f, 1.0f, 0.4f);
     glMatrixMode(GL_PROJECTION);
+    glEnable(GL_DEPTH_TEST);
+    is_depth = 1;
     glLoadIdentity();
-    gluPerspective(20.0, 1.0, 1.0, 2000.0);
-    glMatrixMode(GL_MODELVIEW);
+    //gluPerspective(10.0, 1.0, 1.0, 2000.0);
+    //glMatrixMode(GL_MODELVIEW);
     glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
     glEnable(GL_LINE_SMOOTH);
@@ -49,16 +73,31 @@ void init() {
     pos_y = model.pos_y;
     pos_z = model.pos_z - 1.0f;
 
-    zoom_per_scroll = -model.pos_z / 10.0f;
+    zoom_per_scroll = -model.pos_z / 5.0f;
 }
 
 void display() {
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+    if (is_depth)
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    else
+        glClear(GL_COLOR_BUFFER_BIT);
+
     glLoadIdentity();
     glTranslatef(pos_x, pos_y, pos_z);
     glRotatef(angle_x, 1.0f, 0.0f, 0.0f);
     glRotatef(angle_y, 0.0f, 1.0f, 0.0f);
+
+    gluLookAt(0.0f, 0.0f, 3.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f);
+
+    glRotatef(xrot, 1.0f, 0.0f, 0.0f);
+    glRotatef(yrot, 0.0f, 1.0f, 0.0f);
+
+    glPushMatrix();
+
     model.draw();
+
+    glPopMatrix();
     glutSwapBuffers();
 }
 
@@ -91,7 +130,7 @@ void mouse(int button, int state, int x, int y) {
             }
             break;
         case 4:
-            if (current_scroll < 15) {
+            if (current_scroll < 5) {
                 current_scroll++;
                 pos_z -= zoom_per_scroll;
             }
@@ -124,47 +163,56 @@ void keyboard(unsigned char key, int x, int y)
 {
     switch (key)
     {
-    case 'w':
-    case 'W':
-        zmov += 3.0;
+    case 'a':
+    case 'A':
+        glTranslatef(-3.0, 0.0, 0.0);
         break;
     case 'd':
     case 'D':
-        xmov += 3.0;
+        glTranslatef(3.0, 0.0, 0.0);
+        break;
+    case 'z':
+    case 'Z':
+        glTranslatef(0.0, 3.0, 0.0);
+        break;
+    case 'x':
+    case 'X':
+        glTranslatef(0.0, -3.0, 0.0);
+        break;
+    case 'w':
+    case 'W':
+        glTranslatef(0.0, 0.0, 5.0);
         break;
     case 's':
     case 'S':
-        zmov -= 3.0;
+        glTranslatef(0.0, 0.0, -5.0);
         break;
-    case 'a':
-    case 'A':
-        xmov -= 3.0;
-        break;
-    case '7':
-        ymov += 3.0;
-        break;
-    case '9':
-        ymov -= 3.0;
-        break;
-    case '2':
+    case 'i':
+    case 'I':
         glRotatef(2.0, 1.0, 0.0, 0.0);
         break;
-    case '8':
+    case 'k':
+    case 'K':
         glRotatef(-2.0, 1.0, 0.0, 0.0);
         break;
-    case '6':
+    case 'j':
+    case 'J':
         glRotatef(2.0, 0.0, 1.0, 0.0);
         break;
-    case '4':
+    case 'l':
+    case 'L':
         glRotatef(-2.0, 0.0, 1.0, 0.0);
         break;
-    case '1':
+    case 'm':
+    case 'M':
         glRotatef(2.0, 0.0, 0.0, 1.0);
         break;
-    case '3':
+    case 'n':
+    case 'N':
         glRotatef(-2.0, 0.0, 0.0, 1.0);
         break;
-    case '5':
+    case 'q':
+    case 'Q':
         if (is_depth)
         {
             is_depth = 0;
@@ -179,6 +227,16 @@ void keyboard(unsigned char key, int x, int y)
     display();
 }
 
+void resize(int width, int height)
+{
+    if (height == 0) height = 1;
+    glMatrixMode(GL_PROJECTION);
+    glLoadIdentity();
+    gluPerspective(12.0, width / height, 1.0, 2000.0);
+    glTranslatef(0.0, -5.0, -10.0);
+    glMatrixMode(GL_MODELVIEW);
+}
+
 int main(int argc, char** argv) {
     glutInit(&argc, argv);
 
@@ -190,12 +248,13 @@ int main(int argc, char** argv) {
     POS_Y = (glutGet(GLUT_SCREEN_HEIGHT) - HEIGHT) >> 1;
     glutInitWindowPosition(POS_X, POS_Y);
     glutInitWindowSize(WIDTH, HEIGHT);
-    glutCreateWindow("GRAND CANYON PARK");
+    glutCreateWindow("Grand Canyon Parkway");
     init();
     glutDisplayFunc(display);
     glutMouseFunc(mouse);
     glutMotionFunc(motion);
     glutKeyboardFunc(keyboard);
+    glutReshapeFunc(resize);
     glutTimerFunc(0, timer, 0);
     glutMainLoop();
     return 0;
